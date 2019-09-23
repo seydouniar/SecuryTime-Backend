@@ -1,0 +1,71 @@
+<html>
+    <body>
+        <h3>Entrer nom et prenom </h3>
+        <form action="/user_create" method="POST">
+            <input type="text" placeholder="nom" id="nom" name="nom">
+            <input type="text" placeholder="prenom" id=prenom name="prenom">
+            <input type="submit" value="envoyer">
+        </form>
+
+    <div class="container">
+    <form action="agents/new" method="POST">
+        <div class="form-group row">
+            <label class="control-label col-sm-2" for="matricule">N° Matricule</label>
+            <input type="text" class="form-control col-sm-8" name="matricule" id="matricule">
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <div class="form-group row">
+                    <label class= "control-label col-sm-2" for="genre">Civilité</label>
+                    <select class="form-control col-sm-8" name="genre" id="genre">
+                        <option value="Monsieur">Monsieur</option>
+                        <option value="Madame">Madame</option>
+                    </select>
+                </div>
+                
+                <div class="form-group row">
+                    <label class= "control-label col-sm-2" for="nom">Nom</label>
+                    <input type="text" class="form-control col-sm-10" name="nom" id="nom">
+                </div>
+                <div class="form-group row">
+                    <label class= "control-label col-sm-2 " for="prenom">Prénom</label>
+                    <input type="text" class="form-control col-sm-10" name="prenom" id="prenom">
+                </div>
+            
+                <div class="form-group row">
+                    <label class= "control-label col-sm-2" for="adresse">adresse</label>
+                    <input type="text" class="form-control col-sm-10" name="adresse" id="adresse">
+                </div>
+                <div class="form-group row">
+                    <label class="control-label col-sm-2" for="code_postale">cp</label>
+                    <input type="text" class="form-control col-sm-6" name="code_postale" id="code_postale">
+                </div>
+            </div>
+
+            <div class="col-6">
+                <div class="form-group row">
+                    <label class= "control-label col-sm-2" for="ville">ville</label>
+                    <input type="text" class="form-control col-sm-10" name="ville" id="ville">
+                </div>
+                <div class="form-group row">
+                    <label class= "control-label col-sm-2" for="pays">pays</label>
+                    <input type="text" class="form-control col-sm-10" name="pays" id="pays">
+                </div>
+                
+                <div class="form-group row">
+                    <label class= "control-label col-sm-2" for="email">email</label>
+                    <input type="text" class="form-control col-sm-10" name="contacts" id="contacts">
+                </div>
+                
+            </div>
+        </div>
+        <div class="row">
+            <button class="btn btn-danger col-sm-4" type="button">Annuler</button>
+            <button type="submit" class="btn btn-success col-sm-4 offset-sm-4" [disabled]="invalid">Enregistrer</button>
+        </div>
+            
+    </form>
+</div>
+
+    </body>
+</html>
