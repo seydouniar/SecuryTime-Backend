@@ -4,13 +4,13 @@ const mysql = require("mysql");
 const bodyParser = require("body-parser")
 const router = express.Router()
 router.use(bodyParser.json())
-router.use(bodyParser.urlencoded({ extended: false }))
+
 function getConnection() {
     const connection = mysql.createConnection({
         host: "localhost",
         user: "root",
-        database: "security_db",
-
+        password:"niare",
+        database: "security_db"
     });
     return connection;
 }
@@ -22,26 +22,71 @@ router.all("/*", function(req, res, next){
   next();
 });
 
-router.get("/agents",(req,res)=>{
+//get agent by id
+router.get("/agents/:id",(req,res)=>{
     console.log("liste des agent");
-    const reqquery = "SELECT * FROM AGENTS";
+    const reqquery = "SELECT * FROM agents WHERE id_agent = ?";
 
-    getConnection().query(reqquery, (err, row, fields) => {
+    getConnection().query(reqquery, [req.params.id],(err, row, fields) => {
         if (err) {
             res.sendStatus(500)
             res.end()
             return
         }
-        console.log("agents fetching succeful")
+        console.log("agents fetching succeful",row.insertId)
         const users = row.map((r) => {
             return { id: r.id_agent, matricule: r.matricule, genre: r.genre,
-                nom: r.nom, adresse: r.adresse, cp: r.code_postale,
-                ville: r.ville, pays: r.pays, contacts: r.contacts }
+                nom: r.nom, adresse: JSON.parse(r.adresse), contacts: JSON.parse(r.contacts) }
         })
         res.json(users)
 
     })
 })
+
+router.get("/agents", (req, res) => {
+    console.log("liste des agent");
+    const reqquery = "SELECT * FROM agents";
+
+    getConnection().query(reqquery,(err, row, fields) => {
+        if (err) {
+            res.sendStatus(500)
+            res.end()
+            return
+        }else {
+            row.map((r) => {
+                const reqquery2 = "SELECT * FROM cartes WHERE id_agent=?";
+                getConnection().query(reqquery2, r.id_agent, (err, row2, fields) => {
+                    if(err){
+                        res.sendStatus(500)
+                        res.end()
+                        return
+                    }else{
+                        const users = row.map((r2)=>{
+                            return {
+                                id: r.id_agent,
+                                matricule: r.matricule,
+                                genre: r.genre,
+                                nom: r.nom,
+                                adresse: JSON.parse(r.adresse),
+                                contacts: JSON.parse(r.contacts),
+                                cartes: row2.map((r2) => {
+                                    return {
+                                        numero: r2.numero,
+                                        type: r2.type,
+                                        delivre: r2.delivre,
+                                        fin: r2.fin
+                                    }
+                                })
+                            }
+                        })
+                        res.json(users)
+                    }
+                })
+            })
+        }
+    });
+})               
+
 router.post("/agents/new", (req, res) => {
     res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
     res.header('Access-Control-Allow-Methods', 'POST');
@@ -49,31 +94,85 @@ router.post("/agents/new", (req, res) => {
     const matricule = parseInt(req.body.matricule)
     const nom = req.body.nom+" "+req.body.prenom
     const genre = req.body.genre
-    const adresse = req.body.adresse
-    const code_postale = parseInt(req.body.code_postale)
-    const ville = req.body.ville
-    const pays = req.body.pays
-    const contacts = req.body.contacts
-    
+    const adresse = JSON.stringify(req.body.adresse)
+    const contacts = JSON.stringify(req.body.contacts)
+    const cni = req.body.cni
+    const ca = req.body.carte_agent
 
-    const valeurs = [matricule,nom,genre,adresse,code_postale,ville,pays,contacts]
-    console.log(valeurs);
     
+    const valeurs = [matricule,nom,genre,adresse,contacts]
     
-    
-    const reqquery = "INSERT INTO agents(matricule,nom,genre,adresse,code_postale,ville,pays,contacts) VALUES (?,?,?,?,?,?,?,?)";
-    getConnection().query(reqquery, valeurs,(err, row, fields) => {
+    console.log(cni,ca)
+    const connection = getConnection()
+    const reqquery = "INSERT INTO agents(matricule,nom,genre,adresse,contacts) VALUES (?,?,?,?,?)";
+    connection.connect((err)=> {
         if (err) {
-            res.sendStatus(500)
-            res.end()
-            return
+            console.error('error connecting: ' + err.stack);
+            return;
         }
-        console.log("users fetching succeful",row.insertedId)
-        res.end()
+        console.log('connected as id ' + connection.threadId);
+    });
+    connection.beginTransaction((err)=>{
+        if(err){
+            res.json({success: false})
+            console.log(err);
+            return
+            
+        }
     })
+    connection.query(reqquery, valeurs,(err, row, fields) => {
+        if (err) {
+            connection.rollback(() =>{
+                res.json({success: false})
+                console.log(err);
+                return
+                
+            });
 
-    res.end()
-    
+        }else{
+            console.log("agent inserted with id",row.insertId)
+            const v_cni = [row.insertId, cni.delivre, cni.fin, cni.numero, 'cni']
+            const v_ca = [row.insertId, ca.delivre, ca.fin, ca.numero, 'ca']
+            console.log([v_cni, v_ca]);
+            
+            const queryCarte = "INSERT INTO cartes (id_agent,delivre,fin,numero,type) VALUES (?)"
+        
+            connection.query(queryCarte,[v_cni],(err,row,fields) =>{
+            if (err) {
+                connection.rollback(function () {
+                   console.log(err) 
+                    return
+                });
+            }else{
+                connection.query(queryCarte,[v_ca],(err,row,fields) =>{
+                    if (err) {
+                        connection.rollback(function () {
+                            throw err;
+                        });
+                    } else {
+                        connection.commit(function (err) {
+                            if (err) {
+                                connection.rollback(function () {
+                                    throw err;
+                                });
+                            }
+                            res.json({
+                                success: true
+                            })
+                            console.log('Transaction Complete.');
+                            connection.end();
+                        });
+                    }
+                })
+                
+                
+            }
+        })
+    }
+        
+    })
+      
 })
+
 
 module.exports=router

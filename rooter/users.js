@@ -7,6 +7,7 @@ function getConnection() {
     const connection = mysql.createConnection({
         host: "localhost",
         user: "root",
+        password:"niare",
         database: "security_db",
 
     });
@@ -36,7 +37,7 @@ router.get("/users/:id", (req, res) => {
 router.get("/users", (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
     console.log("server responding to users");
-    const reqquery = "SELECT * FROM USERS"
+    const reqquery = "SELECT * FROM users"
     getConnection().query(reqquery, (err, row, fields) => {
         if (err) {
             res.sendStatus(500)
