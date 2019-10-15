@@ -1,13 +1,15 @@
 -- phpMyAdmin SQL Dump
--- version 4.6.6deb5
+-- version 4.8.5
 -- https://www.phpmyadmin.net/
 --
--- Client :  localhost:3306
--- Généré le :  Lun 14 Octobre 2019 à 21:00
--- Version du serveur :  5.7.27-0ubuntu0.18.04.1
--- Version de PHP :  7.2.19-0ubuntu0.18.04.2
+-- Hôte : 127.0.0.1:3306
+-- Généré le :  mar. 15 oct. 2019 à 04:51
+-- Version du serveur :  5.7.26
+-- Version de PHP :  7.2.18
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
+START TRANSACTION;
 SET time_zone = "+00:00";
 
 
@@ -26,17 +28,20 @@ SET time_zone = "+00:00";
 -- Structure de la table `agents`
 --
 
-CREATE TABLE `agents` (
-  `id_agent` int(11) NOT NULL,
+DROP TABLE IF EXISTS `agents`;
+CREATE TABLE IF NOT EXISTS `agents` (
+  `id_agent` int(11) NOT NULL AUTO_INCREMENT,
   `matricule` int(11) NOT NULL,
   `nom` varchar(45) NOT NULL,
   `genre` varchar(11) NOT NULL,
   `adresse` json DEFAULT NULL,
-  `contacts` json DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `contacts` json DEFAULT NULL,
+  PRIMARY KEY (`id_agent`),
+  UNIQUE KEY `matricule` (`matricule`)
+) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=latin1;
 
 --
--- Contenu de la table `agents`
+-- Déchargement des données de la table `agents`
 --
 
 INSERT INTO `agents` (`id_agent`, `matricule`, `nom`, `genre`, `adresse`, `contacts`) VALUES
@@ -48,17 +53,21 @@ INSERT INTO `agents` (`id_agent`, `matricule`, `nom`, `genre`, `adresse`, `conta
 -- Structure de la table `cartes`
 --
 
-CREATE TABLE `cartes` (
-  `id_carte` int(11) NOT NULL,
+DROP TABLE IF EXISTS `cartes`;
+CREATE TABLE IF NOT EXISTS `cartes` (
+  `id_carte` int(11) NOT NULL AUTO_INCREMENT,
   `id_agent` int(11) NOT NULL,
   `delivre` date NOT NULL,
   `fin` text NOT NULL,
   `numero` varchar(30) NOT NULL,
-  `type` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `type` varchar(20) NOT NULL,
+  PRIMARY KEY (`id_carte`),
+  UNIQUE KEY `numero` (`numero`) USING BTREE,
+  KEY `id_agent` (`id_agent`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
 
 --
--- Contenu de la table `cartes`
+-- Déchargement des données de la table `cartes`
 --
 
 INSERT INTO `cartes` (`id_carte`, `id_agent`, `delivre`, `fin`, `numero`, `type`) VALUES
@@ -68,17 +77,33 @@ INSERT INTO `cartes` (`id_carte`, `id_agent`, `delivre`, `fin`, `numero`, `type`
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `sites`
+--
+
+DROP TABLE IF EXISTS `sites`;
+CREATE TABLE IF NOT EXISTS `sites` (
+  `id_site` int(11) NOT NULL AUTO_INCREMENT,
+  `data_site` json NOT NULL,
+  `adresse` json NOT NULL,
+  PRIMARY KEY (`id_site`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `users`
 --
 
-CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `nom` varchar(45) NOT NULL,
-  `prenom` varchar(45) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `prenom` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 
 --
--- Contenu de la table `users`
+-- Déchargement des données de la table `users`
 --
 
 INSERT INTO `users` (`id`, `nom`, `prenom`) VALUES
@@ -89,51 +114,7 @@ INSERT INTO `users` (`id`, `nom`, `prenom`) VALUES
 (5, 'Niaré', 'SEYDOU');
 
 --
--- Index pour les tables exportées
---
-
---
--- Index pour la table `agents`
---
-ALTER TABLE `agents`
-  ADD PRIMARY KEY (`id_agent`),
-  ADD UNIQUE KEY `matricule` (`matricule`);
-
---
--- Index pour la table `cartes`
---
-ALTER TABLE `cartes`
-  ADD PRIMARY KEY (`id_carte`),
-  ADD UNIQUE KEY `numero` (`numero`) USING BTREE,
-  ADD KEY `id_agent` (`id_agent`) USING BTREE;
-
---
--- Index pour la table `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`);
-
---
--- AUTO_INCREMENT pour les tables exportées
---
-
---
--- AUTO_INCREMENT pour la table `agents`
---
-ALTER TABLE `agents`
-  MODIFY `id_agent` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
---
--- AUTO_INCREMENT pour la table `cartes`
---
-ALTER TABLE `cartes`
-  MODIFY `id_carte` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
---
--- AUTO_INCREMENT pour la table `users`
---
-ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
---
--- Contraintes pour les tables exportées
+-- Contraintes pour les tables déchargées
 --
 
 --
@@ -141,6 +122,7 @@ ALTER TABLE `users`
 --
 ALTER TABLE `cartes`
   ADD CONSTRAINT `cartes_ibfk_1` FOREIGN KEY (`id_agent`) REFERENCES `agents` (`id_agent`) ON DELETE CASCADE;
+COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

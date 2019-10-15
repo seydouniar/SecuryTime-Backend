@@ -7,7 +7,7 @@ function getConnection() {
     const connection = mysql.createConnection({
         host: "localhost",
         user: "root",
-        password:"niare",
+        password:"",
         database: "security_db",
 
     });

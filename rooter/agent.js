@@ -9,7 +9,7 @@ function getConnection() {
     const connection = mysql.createConnection({
         host: "localhost",
         user: "root",
-        password:"niare",
+        password:"",
         database: "security_db"
     });
     return connection;
@@ -23,11 +23,11 @@ router.all("/*", function(req, res, next){
 });
 
 //get agent by id
-router.get("/agents/:id",(req,res)=>{
+router.get("/agents",(req,res)=>{
     console.log("liste des agent");
-    const reqquery = "SELECT * FROM agents WHERE id_agent = ?";
+    const reqquery = "SELECT * FROM agents";
 
-    getConnection().query(reqquery, [req.params.id],(err, row, fields) => {
+    getConnection().query(reqquery,(err, row, fields) => {
         if (err) {
             res.sendStatus(500)
             res.end()
@@ -43,49 +43,25 @@ router.get("/agents/:id",(req,res)=>{
     })
 })
 
-router.get("/agents", (req, res) => {
+router.get("/agents/:id", (req, res) => {
     console.log("liste des agent");
-    const reqquery = "SELECT * FROM agents";
-
-    getConnection().query(reqquery,(err, row, fields) => {
+    const reqquery = "SELECT * FROM agents WHERE id_agent = ?";
+    console.log(req.params.id);
+    
+    getConnection().query(reqquery,[req.params.id],(err, row, fields) => {
         if (err) {
             res.sendStatus(500)
             res.end()
             return
-        }else {
-            row.map((r) => {
-                const reqquery2 = "SELECT * FROM cartes WHERE id_agent=?";
-                getConnection().query(reqquery2, r.id_agent, (err, row2, fields) => {
-                    if(err){
-                        res.sendStatus(500)
-                        res.end()
-                        return
-                    }else{
-                        const users = row.map((r2)=>{
-                            return {
-                                id: r.id_agent,
-                                matricule: r.matricule,
-                                genre: r.genre,
-                                nom: r.nom,
-                                adresse: JSON.parse(r.adresse),
-                                contacts: JSON.parse(r.contacts),
-                                cartes: row2.map((r2) => {
-                                    return {
-                                        numero: r2.numero,
-                                        type: r2.type,
-                                        delivre: r2.delivre,
-                                        fin: r2.fin
-                                    }
-                                })
-                            }
-                        })
-                        res.json(users)
-                    }
-                })
-            })
         }
-    });
-})               
+        const agent = row.map((r) => {
+            return { id: r.id_agent, matricule: r.matricule, genre: r.genre,
+                nom: r.nom, adresse: JSON.parse(r.adresse), contacts: JSON.parse(r.contacts) }
+        })
+        res.json(agent)
+    }) 
+
+})
 
 router.post("/agents/new", (req, res) => {
     res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
