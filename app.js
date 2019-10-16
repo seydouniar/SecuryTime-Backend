@@ -5,12 +5,14 @@ const morgan = require("morgan");
 const bodyParser = require("body-parser")
 const routerA = require("./rooter/agent.js")
 const routerU = require("./rooter/users.js")
+const routerS = require("./rooter/sites.js")
 const mysql = require("mysql")
 app.use(express.static("./public"))
 app.use(morgan("short"));
 app.use(bodyParser.urlencoded({extended:false}))
 app.use(routerA)
 app.use(routerU)
+app.use(routerS)
 app.get("/",(req,res)=>{
     console.log("server responding to root..");
     res.send("hello world from root")
