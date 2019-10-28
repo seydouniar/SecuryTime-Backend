@@ -9,7 +9,7 @@ function getConnection() {
     const connection = mysql.createConnection({
         host: "localhost",
         user: "root",
-        password:"",
+        password:"niare",
         database: "security_db"
     });
     return connection;
