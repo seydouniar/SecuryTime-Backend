@@ -5,15 +5,7 @@ const bodyParser = require("body-parser")
 const router = express.Router()
 router.use(bodyParser.json())
 
-function getConnection() {
-    const connection = mysql.createConnection({
-        host: "localhost",
-        user: "root",
-        password:"niare",
-        database: "security_db"
-    });
-    return connection;
-}
+const db = require("./db_config.js")
 
 router.all("/*", function(req, res, next){
   res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
@@ -26,7 +18,7 @@ router.all("/*", function(req, res, next){
 router.get('/sites',(req,res)=>{
     const reqquery = "SELECT * FROM sites";
 
-    getConnection().query(reqquery,(err, row, fields) => {
+    db.query(reqquery,(err, row, fields) => {
         if (err) {
             res.sendStatus(500)
             res.end()
@@ -44,26 +36,29 @@ router.get('/sites',(req,res)=>{
 //get clients
 router.get('/clients',(req,res)=>{
     const reqquery = "SELECT * FROM clients";
-
-    getConnection().query(reqquery,(err, row, fields) => {
-        if (err) {
-            res.sendStatus(500)
-            res.end()
-            return
-        }
-        console.log("clients fetching succeful",row.insertId)
-        const clients = row.map((r) => {
-            return { id: r.id_client, client_data: JSON.parse(r.client_data) }
+    return new Promise((resolve,reject)=>{
+        db.query(reqquery,(err, row, fields) => {
+            if (err) {
+                res.sendStatus(500)
+                reject(err)
+                res.end()
+                return
+            }
+            console.log("clients fetching succeful",row.insertId)
+            const clients = row.map((r) => {
+                return { id: r.id_client, client_data: JSON.parse(r.client_data) }
+            })
+            res.json(clients)
+            resolve(clients)
         })
-        res.json(clients)
-
     })
+    
 })
 
 //site by Id
 router.get('/sites/:id',(req,res)=>{
     const reqquery = "SELECT * FROM sites WHERE id_site = ?";
-    getConnection().query(reqquery,[req.params.id],(err, row, fields) => {
+    db.query(reqquery,[req.params.id],(err, row, fields) => {
         if (err) {
             res.sendStatus(500)
             res.end()
@@ -95,7 +90,7 @@ router.post('/sites/new',(req,res)=>{
     console.log(valeurs);
     
     reqquery = "INSERT INTO sites (id_client,data_site,adresse) VALUES (?,?,?)"
-    getConnection().query(reqquery,valeurs,(err,row,fields)=>{
+    db.query(reqquery,valeurs,(err,row,fields)=>{
         if(err){
             res.sendStatus(500)
             console.log(err);
@@ -121,7 +116,7 @@ router.post('/clients/new',(req,res)=>{
     console.log(valeurs);
     
     reqquery = "INSERT INTO clients (client_data) VALUES (?)"
-    getConnection().query(reqquery,valeurs,(err,row,fields)=>{
+    db.query(reqquery,valeurs,(err,row,fields)=>{
         if(err){
             console.log(err);
             

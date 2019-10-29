@@ -5,15 +5,8 @@ const bodyParser = require("body-parser")
 const router = express.Router()
 router.use(bodyParser.json())
 
-function getConnection() {
-    const connection = mysql.createConnection({
-        host: "localhost",
-        user: "root",
-        password:"niare",
-        database: "security_db"
-    });
-    return connection;
-}
+const db = require("./db_config.js")
+
 
 router.all("/*", function(req, res, next){
   res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
@@ -24,23 +17,26 @@ router.all("/*", function(req, res, next){
 
 //get agent by id
 router.get("/agents",(req,res)=>{
-    console.log("liste des agent");
-    const reqquery = "SELECT * FROM agents";
-
-    getConnection().query(reqquery,(err, row, fields) => {
-        if (err) {
-            res.sendStatus(500)
-            res.end()
-            return
-        }
-        console.log("agents fetching succeful",row.insertId)
-        const users = row.map((r) => {
-            return { id: r.id_agent, matricule: r.matricule, genre: r.genre,
-                nom: r.nom, adresse: JSON.parse(r.adresse), contacts: JSON.parse(r.contacts) }
+    return new Promise((resolve,reject)=>{
+        const reqquery = "SELECT * FROM agents";
+        db.query(reqquery,(err, row, fields) => {
+            if (err) {
+                res.sendStatus(500)
+                reject(err)
+                return
+            }
+            console.log("agents fetching succeful",row.insertId)
+            const users = row.map((r) => {
+                return { id: r.id_agent, matricule: r.matricule, genre: r.genre,
+                    nom: r.nom, adresse: JSON.parse(r.adresse), contacts: JSON.parse(r.contacts) }
+            })
+            resolve(users)
+            res.json(users)
+    
         })
-        res.json(users)
-
     })
+
+   
 })
 
 router.get("/agents/:id", (req, res) => {
@@ -48,7 +44,7 @@ router.get("/agents/:id", (req, res) => {
     const reqquery = "SELECT * FROM agents WHERE id_agent = ?";
     console.log(req.params.id);
     
-    getConnection().query(reqquery,[req.params.id],(err, row, fields) => {
+    db.query(reqquery,[req.params.id],(err, row, fields) => {
         if (err) {
             res.sendStatus(500)
             res.end()
@@ -79,7 +75,7 @@ router.post("/agents/new", (req, res) => {
     const valeurs = [matricule,nom,genre,adresse,contacts]
     
     console.log(cni,ca)
-    const connection = getConnection()
+    const connection = db
     const reqquery = "INSERT INTO agents(matricule,nom,genre,adresse,contacts) VALUES (?,?,?,?,?)";
     connection.connect((err)=> {
         if (err) {
