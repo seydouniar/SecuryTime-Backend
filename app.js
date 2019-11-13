@@ -1,4 +1,5 @@
 //loading server
+const cool = require('cool-ascii-faces')
 const express = require('express');
 const app = express();
 const morgan = require("morgan");
