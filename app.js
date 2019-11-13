@@ -8,6 +8,7 @@ const routerU = require("./rooter/users.js")
 const routerS = require("./rooter/sites.js")
 const routerE = require("./rooter/event.js")
 const mysql = require("mysql")
+const PORT = process.env.PORT || 3003
 app.use(express.static("./public"))
 app.use(morgan("short"));
 app.use(bodyParser.urlencoded({extended:false}))
@@ -50,7 +51,7 @@ app.post("/user_create", (req, res) => {
 })
 
 
-app.listen(3003,()=>{
+app.listen(PORT, () => {
     console.log("server listning on 3003 ...");
     
 })
