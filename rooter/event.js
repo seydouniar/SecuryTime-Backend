@@ -49,13 +49,14 @@ router.get('/events',(req,res)=>{
 })
 
 router.post('/events/new', (req, res) => {
-    const id_agent = parseInt(req.body.id_agent)
-    const id_site = parseInt(req.body.id_site)
+    
+    const id_site = parseInt(req.body.site)
     const debut = req.body.debut
     const fin = req.body.fin
-
-    const values = [id_agent,id_site,debut,fin]
-    const reqquery = "INSERT INTO events(id_agent,id_site,debut,fin) VALUES (?,?,?,?)";
+    console.log(id_site);
+    
+    const values = [id_site,debut,fin]
+    const reqquery = "INSERT INTO events(id_site,debut,fin) VALUES (?,?,?)";
     db.query(reqquery,values,(err,row,field) =>{
         return new Promise((resolve,reject)=>{
             if (err) {
@@ -73,5 +74,80 @@ router.post('/events/new', (req, res) => {
         
     })
 })
+
+
+router.put('/events/add_agent', (req, res) => {
+    const id_agent = parseInt(req.body.id_agent)
+    const id = parseInt(req.body.id)
+
+    const values = [id_agent,id]
+    const reqquery = "UPDATE events SET id_agent=? WHERE id = ?";
+    db.query(reqquery,values,(err,row,field) =>{
+        return new Promise((resolve,reject)=>{
+            if (err) {
+                res.sendStatus(500)
+                console.log(err);
+                res.json({success: false})
+                res.end()
+                return
+            }else{
+                res.json({success: true})
+                resolve({success: true})
+            }
+        })
+        
+        
+    })
+})
+
+router.post('/events/update', (req, res) => {
+    const heure_debut = req.body.debut
+    const heure_fin = req.body.fin
+    const id = parseInt(req.body.id)
+
+    const values = [heure_debut,heure_fin,id]
+    const reqquery = "UPDATE events SET debut=?,fin=? WHERE id = ?";
+    db.query(reqquery,values,(err,row,field) =>{
+        return new Promise((resolve,reject)=>{
+            if (err) {
+                res.sendStatus(500)
+                console.log(err);
+                res.json({success: false})
+                res.end()
+                return
+            }else{
+                res.json({success: true})
+                resolve({success: true})
+            }
+        })
+        
+        
+    })
+})
+
+router.delete('/events/delete', (req, res) => {
+   
+    const id = parseInt(req.body.id)
+
+    const values = [id]
+    const reqquery = "DELET FROM events WHERE id = ?";
+    db.query(reqquery,values,(err,row,field) =>{
+        return new Promise((resolve,reject)=>{
+            if (err) {
+                res.sendStatus(500)
+                console.log(err);
+                res.json({success: false})
+                res.end()
+                return
+            }else{
+                res.json({success: true})
+                resolve({success: true})
+            }
+        })
+        
+        
+    })
+})
+
 
 module.exports=router;
