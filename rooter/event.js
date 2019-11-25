@@ -76,7 +76,7 @@ router.post('/events/new', (req, res) => {
 })
 
 
-router.put('/events/add_agent', (req, res) => {
+router.post('/events/add_agent', (req, res) => {
     const id_agent = parseInt(req.body.id_agent)
     const id = parseInt(req.body.id)
 
@@ -106,8 +106,10 @@ router.post('/events/update', (req, res) => {
     const id = parseInt(req.body.id)
 
     const values = [heure_debut,heure_fin,id]
-    const reqquery = "UPDATE events SET debut=?,fin=? WHERE id = ?";
-    db.query(reqquery,values,(err,row,field) =>{
+    console.log(values);
+    
+    const reqquery = "UPDATE events SET debut = ?, fin = ? WHERE id = ?";
+     db.query(reqquery,values,(err,row,field) =>{
         return new Promise((resolve,reject)=>{
             if (err) {
                 res.sendStatus(500)
@@ -116,8 +118,12 @@ router.post('/events/update', (req, res) => {
                 res.end()
                 return
             }else{
+                
                 res.json({success: true})
                 resolve({success: true})
+                console.log(row);
+                
+                
             }
         })
         
